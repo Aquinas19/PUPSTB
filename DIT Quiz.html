@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>INTE 201: Python Programming Mastery Quiz</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&family=Poppins:wght@400;600&family=Fira+Code&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --pup-maroon: #800000;
+            --pup-gold: #D4AF37;
+            --bg-light: #f8fafc;
+            --text-dark: #1e293b;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Timer Styles */
+        .timer-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: var(--pup-maroon);
+            color: white;
+            padding: 10px 0;
+            text-align: center;
+            font-weight: bold;
+            z-index: 1100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            font-family: 'Fira Code', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+        }
+        #timeDisplay { font-size: 20px; color: var(--pup-gold); }
+
+        .quiz-container {
+            max-width: 900px;
+            width: 100%;
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border-top: 10px solid var(--pup-maroon);
+            margin-top: 50px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 20px;
+        }
+
+        h1 { color: var(--pup-maroon); font-family: 'Poppins', sans-serif; margin: 0; font-size: 28px; }
+        .subtitle { color: var(--pup-gold); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; font-size: 14px; }
+
+        .student-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            background: #fffaf1;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border: 1px solid #ffe4b3;
+        }
+
+        .input-group { display: flex; flex-direction: column; gap: 5px; }
+        .input-group.full-width { grid-column: span 2; }
+        label { font-weight: bold; font-size: 14px; }
+        input[type="text"], input[type="password"], textarea {
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-family: inherit;
+        }
+
+        .section-title {
+            background: var(--pup-maroon);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 6px;
+            margin-top: 40px;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .question-card {
+            margin: 25px 0;
+            padding: 20px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .question-text { font-weight: 600; font-size: 18px; margin-bottom: 15px; display: block; }
+
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .option-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .option-label:hover { background: #fdf2f2; border-color: var(--pup-maroon); }
+        input[type="radio"] { accent-color: var(--pup-maroon); }
+
+        .fill-input { width: 100%; max-width: 400px; border-bottom: 2px solid var(--pup-gold) !important; border-top:none; border-left:none; border-right:none; border-radius: 0; outline: none; background: transparent; }
+
+        .code-area {
+            width: 100%;
+            height: 100px;
+            background: #1e293b;
+            color: #e2e8f0;
+            font-family: 'Fira Code', monospace;
+            padding: 15px;
+            border-radius: 8px;
+            resize: vertical;
+        }
+
+        .footer-actions {
+            margin-top: 50px;
+            text-align: center;
+            padding-top: 30px;
+            border-top: 2px solid #eee;
+        }
+
+        .submit-btn {
+            background: var(--pup-maroon);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(128, 0, 0, 0.3);
+            transition: 0.3s;
+        }
+
+        .submit-btn:hover { transform: scale(1.05); background: #600000; }
+
+        /* Progress & Blockade */
+        .progress-bar {
+            position: fixed;
+            top: 45px;
+            left: 0;
+            height: 4px;
+            background: var(--pup-gold);
+            width: 0%;
+            z-index: 1100;
+            transition: 0.3s;
+        }
+
+        #blockade {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.98);
+            z-index: 2000;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+        }
+
+        /* Admin Modal Styles */
+        #adminModal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 3000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+
+        .modal-content h2 { color: var(--pup-maroon); margin-top: 0; }
+        .modal-buttons { display: flex; gap: 10px; margin-top: 20px; justify-content: center; }
+        
+        .modal-btn {
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            border: none;
+        }
+        .btn-confirm { background: var(--pup-maroon); color: white; }
+        .btn-cancel { background: #e2e8f0; color: var(--text-dark); }
+
+        .admin-link {
+            margin-top: 40px;
+            font-size: 11px;
+            color: #94a3b8;
+            background: none;
+            border: 1px solid #e2e8f0;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .admin-link:hover { color: var(--pup-maroon); border-color: var(--pup-maroon); }
+
+        @media (max-width: 600px) {
+            .student-info { grid-template-columns: 1fr; }
+            .input-group.full-width { grid-column: span 1; }
+            .options-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="timer-bar">
+    <span><i class="fa-solid fa-clock"></i> TIME REMAINING:</span>
+    <span id="timeDisplay">04:00:00</span>
+</div>
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- Access Blocked Message -->
+<div id="blockade">
+    <i class="fa-solid fa-lock" style="font-size: 80px; color: var(--pup-maroon); margin-bottom: 20px;"></i>
+    <h1 style="color: var(--pup-maroon);">Quiz Instance Locked</h1>
+    <p style="font-size: 18px; max-width: 600px;">
+        This quiz has already been submitted or the time limit has expired for this browser session. 
+        Multiple attempts are not allowed.
+    </p>
+    <p>Please check your email for your downloaded answer file.</p>
+    <button class="admin-link" onclick="showAdminModal()">Admin Reset Instance</button>
+</div>
+
+<!-- Admin PIN Modal -->
+<div id="adminModal">
+    <div class="modal-content">
+        <h2>Administrator Access</h2>
+        <p>Enter Admin PIN to reset this instance:</p>
+        <input type="password" id="adminPinInput" placeholder="Enter PIN here..." style="width: 100%;">
+        <div class="modal-buttons">
+            <button class="modal-btn btn-cancel" onclick="closeAdminModal()">Cancel</button>
+            <button class="modal-btn btn-confirm" onclick="verifyAdminPin()">Reset Now</button>
+        </div>
+    </div>
+</div>
+
+<div class="quiz-container" id="mainQuiz">
+    <header>
+        <h1>INTE 201: Python Programming Mastery Quiz</h1>
+        <p class="subtitle">Polytechnic University of the Philippines</p>
+    </header>
+
+    <div class="student-info">
+        <div class="input-group full-width">
+            <label>Full Name:</label>
+            <input type="text" id="studentName" placeholder="Surname, First Name M.I.">
+        </div>
+        <div class="input-group">
+            <label>Student Number:</label>
+            <input type="text" id="studentNumber" placeholder="20XX-XXXXX-MN-0">
+        </div>
+        <div class="input-group">
+            <label>Section:</label>
+            <input type="text" id="studentSection" placeholder="e.g., BSIT 1-1">
+        </div>
+    </div>
+
+    <form id="quizForm">
+        <!-- PART I: MULTIPLE CHOICE -->
+        <h2 class="section-title">Part I: Multiple Choice (1-25)</h2>
+        <div id="mcqContainer"></div>
+
+        <!-- PART II: COMPLETION -->
+        <h2 class="section-title">Part II: Fill in the Blanks (26-40)</h2>
+        <div id="completionContainer"></div>
+
+        <!-- PART III: CODING -->
+        <h2 class="section-title">Part III: Coding Proficiency (41-55)</h2>
+        <div id="codingContainer"></div>
+    </form>
+
+    <div class="footer-actions">
+        <p style="font-size: 14px; color: #64748b; margin-bottom: 20px;">
+            Double-check all your answers. Once submitted, a .doc file will be downloaded. 
+            Email that file to <strong>penalosajason@gmail.com</strong>.
+        </p>
+        <button type="button" class="submit-btn" id="exportBtn" onclick="generateSubmission()">
+            <i class="fa-solid fa-file-word"></i> Finalize & Export Submission (.doc)
+        </button>
+        <br>
+        <button class="admin-link" onclick="showAdminModal()">Admin Reset Instance</button>
+    </div>
+</div>
+
+<script>
+    const mcqQuestions = [
+        { q: "Python creator?", options: ["Dennis Ritchie", "Guido van Rossum"] },
+        { q: "input() default return type?", options: ["String (str)", "Integer (int)"] },
+        { q: "Standard symbol for Start/End in a flowchart?", options: ["Oval", "Rectangle"] },
+        { q: "Which operator returns the remainder of a division?", options: ["%", "//"] },
+        { q: "What is the Boolean value for 'No' or 'Off'?", options: ["False", "0"] },
+        { q: "In the IPO cycle, what does 'P' stand for?", options: ["Process", "Program"] },
+        { q: "What is the result of '5' + '5' in Python?", options: ["10", "'55'"] },
+        { q: "Which loop is best used when the number of iterations is known?", options: ["for", "while"] },
+        { q: "The first item in a Python list is at index:", options: ["0", "1"] },
+        { q: "What is the standard file extension for Python scripts?", options: [".py", ".exe"] },
+        { q: "Which operator performs floor division?", options: ["/", "//"] },
+        { q: "Keyword used to define a function?", options: ["def", "func"] },
+        { q: "Statement used to send a value back from a function?", options: ["return", "out"] },
+        { q: "Which symbol(s) are used for multi-line comments/docstrings?", options: ["#", '""" """'] },
+        { q: "What is the relational operator for 'Not Equal'?", options: ["!=", "<>"] },
+        { q: "Where does list.append() place the new item?", options: ["At the End", "At the Start"] },
+        { q: "What is the result of 2 ** 3?", options: ["6", "8"] },
+        { q: "Which of these data types is Immutable?", options: ["List", "Tuple"] },
+        { q: "What is the logic 'AND' keyword in Python?", options: ["&&", "and"] },
+        { q: "What prefix is used for Formatted Strings?", options: ["f", "s"] },
+        { q: "Which tool is the recommended IDE for this course?", options: ["Visual Studio Code", "Microsoft Excel"] },
+        { q: "range(5) stops before which number?", options: ["5", "6"] },
+        { q: "Keyword used to exit a loop immediately?", options: ["break", "stop"] },
+        { q: "Keyword used to skip the current iteration of a loop?", options: ["continue", "next"] },
+        { q: "Which of these is a Float?", options: ["10", "10.5"] }
+    ];
+
+    const fillQuestions = [
+        "26. To check the data type of a variable, use the function:",
+        "27. Standard variable naming style in Python (e.g., user_age):",
+        "28. The symbol used for decisions in a flowchart is a:",
+        "29. The function used to find the number of items in a list:",
+        "30. Converting '10' to 10 using int() is known as type:",
+        "31. To define code blocks, Python uses mandatory:",
+        "32. The single-line comment symbol in Python is:",
+        "33. The range(5) function starts at the number:",
+        "34. The list method used to remove and return the last item:",
+        "35. Conventional case style for Constants (values that don't change):",
+        "36. To use math.sqrt(), you must first execute: import ____",
+        "37. The result of the logical expression 'True or False' is:",
+        "38. The remainder of '10 % 3' is:",
+        "39. The name for a string starting with f' (e.g., f'Hello {n}'):",
+        "40. Keyword used to start a function definition:"
+    ];
+
+    const codingQuestions = [
+        "41. Write a for loop that prints 'PUP' 5 times.",
+        "42. Write an if-statement that checks if variable x is greater than 10.",
+        "43. Write a single line of code to swap the values of variables 'a' and 'b'.",
+        "44. Create a list named 'L' containing the strings 'Apple', 'Banana', and 'Cherry'.",
+        "45. Define a function named 'hi' that returns the string 'Hello'.",
+        "46. Write code to input two integers from the user and print their sum.",
+        "47. Write code to print only the first item of a list named 'fruits'.",
+        "48. Write a for loop that counts from 1 to 10 and prints each number.",
+        "49. Write an if-else statement: If 'score' is 75 or higher, print 'Pass', else 'Fail'.",
+        "50. Write a line to add the string 'End' to the end of a list named 'items'.",
+        "51. Write code to calculate the area of a square using a variable 'side'.",
+        "52. Use an f-string to print: 'Student: [name]' using a variable named 'name'.",
+        "53. Write code to convert the string '100' into an integer and add 5 to it.",
+        "54. Write an expression to check if the string 'A' exists in the list 'L'.",
+        "55. Write a line that exits a loop if the variable 'i' equals 10."
+    ];
+
+    const QUIZ_DURATION_MS = 4 * 60 * 60 * 1000;
+    let timerInterval;
+
+    window.onload = () => {
+        if (localStorage.getItem('quiz_completed') === 'true') {
+            blockAccess();
+            return;
+        }
+
+        let startTime = localStorage.getItem('quiz_start_time');
+        if (!startTime) {
+            startTime = Date.now();
+            localStorage.setItem('quiz_start_time', startTime);
+        }
+
+        startTimer(parseInt(startTime));
+
+        const mcqCont = document.getElementById('mcqContainer');
+        mcqQuestions.forEach((q, i) => {
+            const card = document.createElement('div');
+            card.className = 'question-card';
+            card.innerHTML = `
+                <span class="question-text">${i + 1}. ${q.q}</span>
+                <div class="options-grid">
+                    ${q.options.map(opt => `
+                        <label class="option-label">
+                            <input type="radio" name="q${i+1}" value="${opt}"> ${opt}
+                        </label>
+                    `).join('')}
+                </div>
+            `;
+            mcqCont.appendChild(card);
+        });
+
+        const fillCont = document.getElementById('completionContainer');
+        fillQuestions.forEach((q, i) => {
+            const num = i + 26;
+            const card = document.createElement('div');
+            card.className = 'question-card';
+            card.innerHTML = `
+                <span class="question-text">${q}</span>
+                <input type="text" name="q${num}" class="fill-input" placeholder="Type answer here...">
+            `;
+            fillCont.appendChild(card);
+        });
+
+        const codeCont = document.getElementById('codingContainer');
+        codingQuestions.forEach((q, i) => {
+            const num = i + 41;
+            const card = document.createElement('div');
+            card.className = 'question-card';
+            card.innerHTML = `
+                <span class="question-text">${q}</span>
+                <textarea name="q${num}" class="code-area" placeholder="# Write your Python code here..."></textarea>
+            `;
+            codeCont.appendChild(card);
+        });
+
+        document.addEventListener('change', updateProgress);
+        document.addEventListener('input', updateProgress);
+    };
+
+    function startTimer(startTime) {
+        const timerElement = document.getElementById('timeDisplay');
+        
+        timerInterval = setInterval(() => {
+            const now = Date.now();
+            const elapsed = now - startTime;
+            const remaining = QUIZ_DURATION_MS - elapsed;
+
+            if (remaining <= 0) {
+                clearInterval(timerInterval);
+                timerElement.innerText = "00:00:00";
+                autoSubmit();
+                return;
+            }
+
+            const h = Math.floor(remaining / 3600000).toString().padStart(2, '0');
+            const m = Math.floor((remaining % 3600000) / 60000).toString().padStart(2, '0');
+            const s = Math.floor((remaining % 60000) / 1000).toString().padStart(2, '0');
+            
+            timerElement.innerText = `${h}:${m}:${s}`;
+            
+            if (remaining < 300000) {
+                timerElement.style.color = "#ff4d4d";
+            }
+        }, 1000);
+    }
+
+    function blockAccess() {
+        document.getElementById('mainQuiz').style.display = 'none';
+        document.getElementById('blockade').style.display = 'flex';
+        document.querySelector('.timer-bar').style.display = 'none';
+        document.querySelector('.progress-bar').style.display = 'none';
+    }
+
+    // Custom Admin Modal Logic
+    function showAdminModal() {
+        document.getElementById('adminModal').style.display = 'flex';
+        document.getElementById('adminPinInput').value = "";
+        document.getElementById('adminPinInput').focus();
+    }
+
+    function closeAdminModal() {
+        document.getElementById('adminModal').style.display = 'none';
+    }
+
+    function verifyAdminPin() {
+        const pin = document.getElementById('adminPinInput').value;
+        if (pin === "PUP_ADMIN_RESET") {
+            localStorage.removeItem('quiz_start_time');
+            localStorage.removeItem('quiz_completed');
+            location.reload();
+        } else {
+            alert("Incorrect PIN.");
+        }
+    }
+
+    function updateProgress() {
+        const total = 55;
+        let filledCount = 0;
+        const mcqs = document.querySelectorAll('#mcqContainer input[type="radio"]:checked');
+        filledCount += mcqs.length;
+        const fills = document.querySelectorAll('.fill-input');
+        fills.forEach(input => { if(input.value.trim() !== "") filledCount++; });
+        const codes = document.querySelectorAll('.code-area');
+        codes.forEach(area => { if(area.value.trim() !== "") filledCount++; });
+        const percent = (filledCount / total) * 100;
+        document.getElementById('progressBar').style.width = percent + "%";
+    }
+
+    function autoSubmit() {
+        alert("TIME IS UP!\n\nYour quiz is being automatically exported and submitted.");
+        generateSubmission(true);
+    }
+
+    function generateSubmission(isAuto = false) {
+        const nameInput = document.getElementById('studentName');
+        const studNoInput = document.getElementById('studentNumber');
+        const sectionInput = document.getElementById('studentSection');
+
+        const name = nameInput.value.trim() || (isAuto ? "UNNAMED_STUDENT" : "");
+        const studNo = studNoInput.value.trim() || (isAuto ? "NO_ID" : "");
+        const section = sectionInput.value.trim() || (isAuto ? "NO_SECTION" : "");
+
+        if(!isAuto && (!name || !studNo || !section)) {
+            alert("Please provide your Full Name, Student Number, and Section before submitting.");
+            return;
+        }
+
+        let content = `
+        <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+        <head><meta charset='utf-8'><title>Submission</title></head>
+        <body style="font-family: Arial, sans-serif;">
+            <div style="text-align: center; border-bottom: 2px solid #800000;">
+                <h1 style="color: #800000;">INTE 201: PYTHON MASTERY QUIZ SUBMISSION</h1>
+                <p style="color: #666;">${isAuto ? "[AUTO-SUBMITTED DUE TO TIME LIMIT]" : "[USER-SUBMITTED]"}</p>
+            </div>
+            <p><strong>STUDENT:</strong> ${name}</p>
+            <p><strong>STUDENT NO:</strong> ${studNo}</p>
+            <p><strong>SECTION:</strong> ${section}</p>
+            <p><strong>DATE:</strong> ${new Date().toLocaleString()}</p>
+            <hr/>
+            <h3>QUIZ ANSWERS</h3>
+        `;
+
+        const form = document.getElementById('quizForm');
+        for(let i = 1; i <= 55; i++) {
+            let val = "";
+            if (i <= 25) {
+                const radio = form.querySelector(`input[name="q${i}"]:checked`);
+                val = radio ? radio.value : "[NO ANSWER]";
+            } else if (i <= 40) {
+                val = form.querySelector(`input[name="q${i}"]`).value.trim() || "[NO ANSWER]";
+            } else {
+                val = form.querySelector(`textarea[name="q${i}"]`).value.trim() || "[NO ANSWER]";
+            }
+            content += `<p><strong>Item ${i}:</strong><br/> ${val.replace(/\n/g, '<br/>')}</p>`;
+            if(i === 25 || i === 40) content += `<hr style="border: 1px dashed #ccc;"/>`;
+        }
+
+        content += `</body></html>`;
+
+        const blob = new Blob([content], { type: 'application/msword' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        const safeName = name.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+        const safeSection = section.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+        a.download = `${safeName}_${safeSection}.doc`;
+        a.href = url;
+        document.body.appendChild(a);
+        a.click();
+        
+        setTimeout(() => {
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }, 0);
+
+        localStorage.setItem('quiz_completed', 'true');
+        blockAccess();
+
+        if(!isAuto) {
+            alert("SUCCESS!\n\nYour submission file (" + a.download + ") has been downloaded.\n\nPlease email this file to penalosajason@gmail.com to complete your submission.");
+        }
+    }
+</script>
+
+</body>
+</html>
