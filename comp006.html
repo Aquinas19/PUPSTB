@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COMP 006: Data Structures and Algorithms Mastery Quiz</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&family=Poppins:wght@400;600&family=Fira+Code&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --pup-maroon: #800000;
+            --pup-gold: #D4AF37;
+            --bg-light: #f8fafc;
+            --text-dark: #1e293b;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Timer Styles */
+        .timer-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: var(--pup-maroon);
+            color: white;
+            padding: 10px 0;
+            text-align: center;
+            font-weight: bold;
+            z-index: 1100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            font-family: 'Fira Code', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            visibility: hidden; 
+        }
+        #timeDisplay { font-size: 20px; color: var(--pup-gold); }
+
+        .quiz-container {
+            max-width: 900px;
+            width: 100%;
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border-top: 10px solid var(--pup-maroon);
+            margin-top: 50px;
+            filter: blur(15px); 
+            transition: filter 0.5s ease;
+            pointer-events: none; 
+        }
+
+        .quiz-container.started {
+            filter: blur(0);
+            pointer-events: auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 20px;
+        }
+
+        h1 { color: var(--pup-maroon); font-family: 'Poppins', sans-serif; margin: 0; font-size: 28px; }
+        .subtitle { color: var(--pup-gold); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; font-size: 14px; }
+
+        .student-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            background: #fffaf1;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border: 1px solid #ffe4b3;
+        }
+
+        .input-group { display: flex; flex-direction: column; gap: 5px; }
+        .input-group.full-width { grid-column: span 2; }
+        label { font-weight: bold; font-size: 14px; }
+        input[type="text"], input[type="password"], textarea {
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-family: inherit;
+        }
+
+        .section-title {
+            background: var(--pup-maroon);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 6px;
+            margin-top: 40px;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .question-card {
+            margin: 25px 0;
+            padding: 20px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .question-text { font-weight: 600; font-size: 18px; margin-bottom: 15px; display: block; }
+
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .option-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .option-label:hover { background: #fdf2f2; border-color: var(--pup-maroon); }
+        input[type="radio"] { accent-color: var(--pup-maroon); }
+
+        .fill-input { width: 100%; max-width: 400px; border-bottom: 2px solid var(--pup-gold) !important; border-top:none; border-left:none; border-right:none; border-radius: 0; outline: none; background: transparent; }
+
+        .code-area {
+            width: 100%;
+            height: 100px;
+            background: #f1f5f9;
+            color: var(--text-dark);
+            font-family: 'Poppins', sans-serif;
+            padding: 15px;
+            border-radius: 8px;
+            resize: vertical;
+            border: 1px solid #cbd5e1;
+        }
+
+        .footer-actions {
+            margin-top: 50px;
+            text-align: center;
+            padding-top: 30px;
+            border-top: 2px solid #eee;
+        }
+
+        .submit-btn {
+            background: var(--pup-maroon);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(128, 0, 0, 0.3);
+            transition: 0.3s;
+        }
+
+        .submit-btn:hover { transform: scale(1.05); background: #600000; }
+
+        .progress-bar {
+            position: fixed;
+            top: 45px;
+            left: 0;
+            height: 4px;
+            background: var(--pup-gold);
+            width: 0%;
+            z-index: 1100;
+            transition: 0.3s;
+            visibility: hidden;
+        }
+
+        #blockade, #startModal, #adminModal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.98);
+            z-index: 2000;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+        }
+
+        #adminModal { background: rgba(0,0,0,0.7); z-index: 3000; }
+        #startModal { background: rgba(248, 250, 252, 0.95); }
+
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            border-top: 8px solid var(--pup-maroon);
+        }
+
+        .modal-buttons { display: flex; gap: 15px; margin-top: 30px; justify-content: center; }
+        
+        .modal-btn {
+            padding: 12px 30px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: bold;
+            border: none;
+            font-size: 16px;
+            transition: 0.2s;
+        }
+        .btn-confirm { background: var(--pup-maroon); color: white; }
+        .btn-confirm:hover { background: #600000; transform: translateY(-2px); }
+        .btn-cancel { background: #e2e8f0; color: var(--text-dark); }
+        .btn-cancel:hover { background: #cbd5e1; }
+
+        .admin-link {
+            margin-top: 40px;
+            font-size: 11px;
+            color: #94a3b8;
+            background: none;
+            border: 1px solid #e2e8f0;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .admin-link:hover { color: var(--pup-maroon); border-color: var(--pup-maroon); }
+
+        @media (max-width: 600px) {
+            .student-info { grid-template-columns: 1fr; }
+            .input-group.full-width { grid-column: span 1; }
+            .options-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="timer-bar" id="timerBar">
+    <span><i class="fa-solid fa-clock"></i> TIME REMAINING:</span>
+    <span id="timeDisplay">04:00:00</span>
+</div>
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- Start Exam Modal -->
+<div id="startModal" style="display: flex;">
+    <div class="modal-content">
+        <i class="fa-solid fa-diagram-project" style="font-size: 60px; color: var(--pup-maroon); margin-bottom: 20px;"></i>
+        <h2>COMP 006: Mastery Quiz</h2>
+        <p style="color: #64748b; line-height: 1.6;">
+            Ready to begin the <strong>Data Structures and Algorithms</strong> Quiz?<br>
+            You have <strong>4 hours</strong> to complete all 55 items. 
+            The timer begins the moment you click Start.
+        </p>
+        <div class="modal-buttons">
+            <button class="modal-btn btn-cancel" onclick="exitExam()">Close</button>
+            <button class="modal-btn btn-confirm" onclick="startExam()">Start Exam</button>
+        </div>
+    </div>
+</div>
+
+<!-- Access Blocked Message -->
+<div id="blockade">
+    <i class="fa-solid fa-user-lock" style="font-size: 80px; color: var(--pup-maroon); margin-bottom: 20px;"></i>
+    <h1 style="color: var(--pup-maroon);">Session Locked</h1>
+    <p style="font-size: 18px; max-width: 600px;">
+        This quiz instance has already been submitted or expired. 
+        Multiple attempts are restricted to ensure academic integrity.
+    </p>
+    <button class="admin-link" onclick="showAdminModal()">Admin Reset Instance</button>
+</div>
+
+<!-- Admin PIN Modal -->
+<div id="adminModal">
+    <div class="modal-content">
+        <h2>Administrator Access</h2>
+        <p>Enter Admin PIN to reset instance:</p>
+        <input type="password" id="adminPinInput" placeholder="Enter PIN..." style="width: 100%; margin-bottom: 10px;">
+        <div class="modal-buttons">
+            <button class="modal-btn btn-cancel" onclick="closeAdminModal()">Cancel</button>
+            <button class="modal-btn btn-confirm" onclick="verifyAdminPin()">Reset Now</button>
+        </div>
+    </div>
+</div>
+
+<div class="quiz-container" id="mainQuiz">
+    <header>
+        <h1>COMP 006: Data Structures and Algorithms Mastery Quiz</h1>
+        <p class="subtitle">College of Computer and Information Sciences</p>
+    </header>
+
+    <div class="student-info">
+        <div class="input-group full-width">
+            <label>Full Name:</label>
+            <input type="text" id="studentName" placeholder="Surname, First Name M.I.">
+        </div>
+        <div class="input-group">
+            <label>Student Number:</label>
+            <input type="text" id="studentNumber" placeholder="20XX-XXXXX-MN-0">
+        </div>
+        <div class="input-group">
+            <label>Section:</label>
+            <input type="text" id="studentSection" placeholder="e.g., BSIT 2-1">
+        </div>
+    </div>
+
+    <form id="quizForm">
+        <!-- PART I: MULTIPLE CHOICE -->
+        <h2 class="section-title">Part I: Multiple Choice (1-25)</h2>
+        <div id="mcqContainer"></div>
+
+        <!-- PART II: COMPLETION -->
+        <h2 class="section-title">Part II: Fill in the Blanks (26-40)</h2>
+        <div id="completionContainer"></div>
+
+        <!-- PART III: IDENTIFICATION & ANALYSIS -->
+        <h2 class="section-title">Part III: Identification & Analysis (41-55)</h2>
+        <div id="codingContainer"></div>
+    </form>
+
+    <div class="footer-actions">
+        <p style="font-size: 14px; color: #64748b; margin-bottom: 20px;">
+            Submit your finalized answers. A .doc file will be generated. 
+            Email the file to <strong>jbpenalosa@pup.edu.ph</strong>.
+        </p>
+        <button type="button" class="submit-btn" id="exportBtn" onclick="generateSubmission()">
+            <i class="fa-solid fa-file-export"></i> Finalize & Export Submission (.doc)
+        </button>
+        <br>
+        <button class="admin-link" onclick="showAdminModal()">Admin Reset Instance</button>
+    </div>
+</div>
+
+<script>
+    const mcqQuestions = [
+        { q: "Which of the following describes the efficiency of an algorithm as the input size grows?", options: ["Big O Notation", "Abstract Data Type"] },
+        { q: "What is the time complexity of accessing an element in an array using its index?", options: ["O(1)", "O(n)"] },
+        { q: "Which data structure follows the Last-In, First-Out (LIFO) principle?", options: ["Stack", "Queue"] },
+        { q: "What is the time complexity of searching for an element in a sorted array using Binary Search?", options: ["O(log n)", "O(n)"] },
+        { q: "Which linked list type allows traversal in both directions (forward and backward)?", options: ["Doubly Linked List", "Singly Linked List"] },
+        { q: "What is the average time complexity of the Bubble Sort algorithm?", options: ["O(n^2)", "O(n log n)"] },
+        { q: "In a Binary Search Tree (BST), where are values smaller than the root typically placed?", options: ["Left Subtree", "Right Subtree"] },
+        { q: "Which sorting algorithm 'divides and conquers' by picking a pivot element?", options: ["Quick Sort", "Merge Sort"] },
+        { q: "What data structure is most appropriate for managing tasks in a printer queue?", options: ["Queue", "Stack"] },
+        { q: "What term describes a node in a tree that has no children?", options: ["Leaf Node", "Root Node"] },
+        { q: "Which complexity class represents an algorithm whose execution time is independent of input size?", options: ["Constant Time", "Linear Time"] },
+        { q: "What is the time complexity of inserting an element at the beginning of a Singly Linked List?", options: ["O(1)", "O(n)"] },
+        { q: "Which non-linear data structure consists of vertices (nodes) and edges?", options: ["Graph", "Tree"] },
+        { q: "Which sorting algorithm repeatedly finds the minimum element and moves it to the beginning?", options: ["Selection Sort", "Insertion Sort"] },
+        { q: "In recursion, what is the condition that stops the recursive calls?", options: ["Base Case", "Iterative Case"] },
+        { q: "What is the worst-case time complexity of Quick Sort?", options: ["O(n^2)", "O(n log n)"] },
+        { q: "Which traversal visits the root node last (Left, Right, Root)?", options: ["Post-order", "Pre-order"] },
+        { q: "What is a major disadvantage of an array compared to a linked list?", options: ["Fixed Size", "Random Access"] },
+        { q: "Which queue variant allows elements to be inserted or deleted from both ends?", options: ["Deque", "Circular Queue"] },
+        { q: "What is the Big O complexity of Merge Sort in all cases?", options: ["O(n log n)", "O(n^2)"] },
+        { q: "Which search algorithm checks every element one by one until the target is found?", options: ["Linear Search", "Binary Search"] },
+        { q: "What does ADT stand for in the context of programming?", options: ["Abstract Data Type", "Advanced Data Tool"] },
+        { q: "Which graph representation uses a 2D array of booleans or integers?", options: ["Adjacency Matrix", "Adjacency List"] },
+        { q: "Which algorithm visits all nodes at the current depth level before moving deeper?", options: ["Breadth First Search (BFS)", "Depth First Search (DFS)"] },
+        { q: "What is the time complexity of searching for a value in a simple unsorted linked list of size n?", options: ["O(n)", "O(1)"] }
+    ];
+
+    const fillQuestions = [
+        "26. Big O notation used to represent constant time is O(____):",
+        "27. The stack operation used to remove the top element is called:",
+        "28. The queue operation used to add an element to the rear is called:",
+        "29. A linked list where the last node points back to the first node is a ____ Linked List:",
+        "30. A tree where each node has at most two children is called a:",
+        "31. The time complexity of accessing an array element by its index is:",
+        "32. The 'L' in LIFO stands for:",
+        "33. A sorting algorithm that builds the final sorted array one item at a time is ____ Sort:",
+        "34. The memory allocation that happens during runtime is called ____ allocation:",
+        "35. The algorithm that splits a list into two halves, sorts them, and then combines them is:",
+        "36. The top-most node of a tree structure is known as the:",
+        "37. A Graph where edges have directions is called a ____ graph:",
+        "38. The search algorithm that requires data to be sorted before execution is:",
+        "39. The complexity of a nested loop where both loops run n times is O(____):",
+        "40. A stack is an example of a ____ data structure (Linear or Non-Linear):"
+    ];
+
+    const codingQuestions = [
+        "41. Analyze the time complexity: f(n) = 5n^2 + 20n + 100. Provide the Big O notation.",
+        "42. Scenario: You are implementing an 'Undo' feature for a text editor. Which ADT is best?",
+        "43. Perform trace: Push(A), Push(B), Pop(), Push(C). What is currently in the stack?",
+        "44. Identify the Data Structure: Each node contains a data field and a 'Next' pointer.",
+        "45. What is the Big O complexity of Bubble Sort if the input array is already sorted?",
+        "46. Explain why a Linked List is preferred over an Array for frequent insertions/deletions.",
+        "47. What occurs when you try to PUSH an element onto a stack that is already full?",
+        "48. Identify the traversal order: Root node, then Left subtree, then Right subtree.",
+        "49. Provide the average time complexity for searching an element in a balanced BST.",
+        "50. Identify the Sort: It selects the smallest element and swaps it with the first unsorted item.",
+        "51. What is the primary difference between a Singly Linked List and a Doubly Linked List?",
+        "52. Which Graph Traversal algorithm typically uses a Queue for implementation?",
+        "53. What occurs when you try to DEQUEUE an element from an empty queue?",
+        "54. In Big O notation, how do you represent an algorithm that doubles its work for every item added?",
+        "55. Identify the ADT: Useful for managing print jobs sent to a shared office printer."
+    ];
+
+    const QUIZ_DURATION_MS = 4 * 60 * 60 * 1000;
+    let timerInterval;
+
+    window.onload = () => {
+        initQuizUI();
+        if (localStorage.getItem('quiz_completed') === 'true') {
+            blockAccess();
+            return;
+        }
+        let startTime = localStorage.getItem('quiz_start_time');
+        if (startTime) {
+            document.getElementById('startModal').style.display = 'none';
+            resumeExam(parseInt(startTime));
+        } else {
+            document.getElementById('startModal').style.display = 'flex';
+        }
+    };
+
+    function initQuizUI() {
+        const mcqCont = document.getElementById('mcqContainer');
+        mcqQuestions.forEach((q, i) => {
+            const card = document.createElement('div');
+            card.className = 'question-card';
+            card.innerHTML = `<span class="question-text">${i + 1}. ${q.q}</span>
+                <div class="options-grid">${q.options.map(opt => `<label class="option-label"><input type="radio" name="q${i+1}" value="${opt}"> ${opt}</label>`).join('')}</div>`;
+            mcqCont.appendChild(card);
+        });
+
+        const fillCont = document.getElementById('completionContainer');
+        fillQuestions.forEach((q, i) => {
+            const num = i + 26;
+            const card = document.createElement('div');
+            card.className = 'question-card';
+            card.innerHTML = `<span class="question-text">${q}</span><input type="text" name="q${num}" class="fill-input" placeholder="Identification...">`;
+            fillCont.appendChild(card);
+        });
+
+        const codeCont = document.getElementById('codingContainer');
+        codingQuestions.forEach((q, i) => {
+            const num = i + 41;
+            const card = document.createElement('div');
+            card.className = 'question-card';
+            card.innerHTML = `<span class="question-text">${q}</span><textarea name="q${num}" class="code-area" placeholder="Enter Analysis/Explanation..."></textarea>`;
+            codeCont.appendChild(card);
+        });
+
+        document.addEventListener('change', updateProgress);
+        document.addEventListener('input', updateProgress);
+    }
+
+    function startExam() {
+        const startTime = Date.now();
+        localStorage.setItem('quiz_start_time', startTime);
+        document.getElementById('startModal').style.display = 'none';
+        resumeExam(startTime);
+    }
+
+    function resumeExam(startTime) {
+        document.getElementById('mainQuiz').classList.add('started');
+        document.getElementById('timerBar').style.visibility = 'visible';
+        document.getElementById('progressBar').style.visibility = 'visible';
+        startTimer(startTime);
+    }
+
+    function exitExam() {
+        if(confirm("Exit exam? Progress will be lost.")) {
+            document.body.innerHTML = "<div style='height:100vh; display:flex; justify-content:center; align-items:center;'><h1>Exam Closed.</h1></div>";
+        }
+    }
+
+    function startTimer(startTime) {
+        const timerElement = document.getElementById('timeDisplay');
+        timerInterval = setInterval(() => {
+            const now = Date.now();
+            const remaining = QUIZ_DURATION_MS - (now - startTime);
+            if (remaining <= 0) {
+                clearInterval(timerInterval);
+                timerElement.innerText = "00:00:00";
+                autoSubmit();
+                return;
+            }
+            const h = Math.floor(remaining / 3600000).toString().padStart(2, '0');
+            const m = Math.floor((remaining % 3600000) / 60000).toString().padStart(2, '0');
+            const s = Math.floor((remaining % 60000) / 1000).toString().padStart(2, '0');
+            timerElement.innerText = `${h}:${m}:${s}`;
+            if (remaining < 300000) timerElement.style.color = "#ff4d4d";
+        }, 1000);
+    }
+
+    function blockAccess() {
+        document.getElementById('startModal').style.display = 'none';
+        document.getElementById('mainQuiz').style.display = 'none';
+        document.getElementById('blockade').style.display = 'flex';
+        document.getElementById('timerBar').style.display = 'none';
+        document.getElementById('progressBar').style.display = 'none';
+    }
+
+    function showAdminModal() {
+        document.getElementById('adminModal').style.display = 'flex';
+        document.getElementById('adminPinInput').value = "";
+        document.getElementById('adminPinInput').focus();
+    }
+
+    function closeAdminModal() { document.getElementById('adminModal').style.display = 'none'; }
+
+    function verifyAdminPin() {
+        if (document.getElementById('adminPinInput').value === "PUP_ADMIN_RESET") {
+            localStorage.removeItem('quiz_start_time');
+            localStorage.removeItem('quiz_completed');
+            location.reload();
+        } else { alert("Incorrect PIN."); }
+    }
+
+    function updateProgress() {
+        const total = 55;
+        let filled = 0;
+        document.querySelectorAll('input[type="radio"]:checked').forEach(() => filled++);
+        document.querySelectorAll('.fill-input').forEach(i => { if(i.value.trim()) filled++; });
+        document.querySelectorAll('.code-area').forEach(i => { if(i.value.trim()) filled++; });
+        document.getElementById('progressBar').style.width = (filled / total) * 100 + "%";
+    }
+
+    function autoSubmit() {
+        generateSubmission(true);
+    }
+
+    function generateSubmission(isAuto = false) {
+        const name = document.getElementById('studentName').value.trim();
+        const section = document.getElementById('studentSection').value.trim();
+        const studNo = document.getElementById('studentNumber').value.trim();
+
+        if(!isAuto && (!name || !section || !studNo)) {
+            alert("All student information fields are required."); return;
+        }
+
+        let content = `
+        <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+        <head><meta charset='utf-8'></head>
+        <body style="font-family: Arial;">
+            <h1>COMP 006: DATA STRUCTURES & ALGORITHMS MASTERY QUIZ SUBMISSION</h1>
+            <p style="color: red;">${isAuto ? "<strong>[AUTO-SUBMITTED ON EXPIRY]</strong>" : ""}</p>
+            <p><strong>STUDENT:</strong> ${name || "N/A"}</p>
+            <p><strong>STUDENT NO:</strong> ${studNo || "N/A"}</p>
+            <p><strong>SECTION:</strong> ${section || "N/A"}</p>
+            <p><strong>DATE:</strong> ${new Date().toLocaleString()}</p>
+            <hr/>
+            <h3>CAPTURED RESPONSES</h3>`;
+
+        const form = document.getElementById('quizForm');
+        for(let i = 1; i <= 55; i++) {
+            let val = "";
+            if(i <= 25) {
+                const radio = form.querySelector(`input[name="q${i}"]:checked`);
+                val = radio ? radio.value : "[EMPTY]";
+            } else if(i <= 40) {
+                val = form.querySelector(`input[name="q${i}"]`).value.trim() || "[EMPTY]";
+            } else {
+                val = form.querySelector(`textarea[name="q${i}"]`).value.trim() || "[EMPTY]";
+            }
+            content += `<p><strong>Item ${i}:</strong><br/> ${val.replace(/\n/g, '<br/>')}</p>`;
+        }
+        content += `</body></html>`;
+
+        const blob = new Blob([content], { type: 'application/msword' });
+        const a = document.createElement('a');
+        const fileName = `${(name || "Student").replace(/\s+/g, '_')}_${(section || "Section").replace(/\s+/g, '_')}.doc`;
+        a.download = fileName;
+        a.href = URL.createObjectURL(blob);
+        document.body.appendChild(a);
+        a.click();
+        
+        localStorage.setItem('quiz_completed', 'true');
+        blockAccess();
+        
+        if(!isAuto) {
+            alert("Submission exported. Email the downloaded file to jbpenalosa@pup.edu.ph");
+        } else {
+            alert("TIME EXPIRED. Partial results downloaded. Email the file to jbpenalosa@pup.edu.ph");
+        }
+    }
+</script>
+
+</body>
+</html>
